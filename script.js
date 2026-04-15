@@ -1,13 +1,64 @@
+const routineForm = document.getElementById('routineForm');
+const timeOfDaySelect = document.getElementById('timeOfDay');
+const focusAreaSelect = document.getElementById('focusArea');
+const timeAvailableSelect = document.getElementById('timeAvailable');
+const energyLevelSelect = document.getElementById('energyLevel');
+const activityCheckboxes = document.querySelectorAll('input[name="activities"]');
+const routinePreferencesKey = 'routinePreferences';
+
+function getSavedRoutinePreferences() {
+  const savedPreferences = localStorage.getItem(routinePreferencesKey);
+
+  return savedPreferences ? JSON.parse(savedPreferences) : null;
+}
+
+function saveRoutinePreferences() {
+  const selectedActivityElements = document.querySelectorAll('input[name="activities"]:checked');
+  const preferredActivities = Array.from(selectedActivityElements).map((activity) => activity.value);
+
+  const routinePreferences = {
+    timeOfDay: timeOfDaySelect.value,
+    focusArea: focusAreaSelect.value,
+    timeAvailable: timeAvailableSelect.value,
+    energyLevel: energyLevelSelect.value,
+    preferredActivities
+  };
+
+  localStorage.setItem(routinePreferencesKey, JSON.stringify(routinePreferences));
+}
+
+function restoreRoutinePreferences() {
+  const savedPreferences = getSavedRoutinePreferences();
+
+  if (!savedPreferences) {
+    return;
+  }
+
+  timeOfDaySelect.value = savedPreferences.timeOfDay || timeOfDaySelect.value;
+  focusAreaSelect.value = savedPreferences.focusArea || focusAreaSelect.value;
+  timeAvailableSelect.value = savedPreferences.timeAvailable || timeAvailableSelect.value;
+  energyLevelSelect.value = savedPreferences.energyLevel || energyLevelSelect.value;
+
+  const preferredActivities = savedPreferences.preferredActivities || [];
+  activityCheckboxes.forEach((checkbox) => {
+    checkbox.checked = preferredActivities.includes(checkbox.value);
+  });
+}
+
+restoreRoutinePreferences();
+
+routineForm.addEventListener('change', saveRoutinePreferences);
+
 // Add an event listener to the form that runs when the form is submitted
-document.getElementById('routineForm').addEventListener('submit', async (e) => {
+routineForm.addEventListener('submit', async (e) => {
   // Prevent the form from refreshing the page
   e.preventDefault();
   
   // Get values from all form inputs
-  const timeOfDay = document.getElementById('timeOfDay').value;
-  const focusArea = document.getElementById('focusArea').value;
-  const timeAvailable = document.getElementById('timeAvailable').value;
-  const energyLevel = document.getElementById('energyLevel').value;
+  const timeOfDay = timeOfDaySelect.value;
+  const focusArea = focusAreaSelect.value;
+  const timeAvailable = timeAvailableSelect.value;
+  const energyLevel = energyLevelSelect.value;
   const selectedActivityElements = document.querySelectorAll('input[name="activities"]:checked');
   const preferredActivities = Array.from(selectedActivityElements).map((activity) => activity.value);
   const activitiesText = preferredActivities.length > 0
