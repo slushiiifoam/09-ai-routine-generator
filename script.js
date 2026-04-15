@@ -3,7 +3,16 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
   // Prevent the form from refreshing the page
   e.preventDefault();
   
-  // TODO: Get values from all inputs and store them in variables
+  // Get values from all form inputs
+  const timeOfDay = document.getElementById('timeOfDay').value;
+  const focusArea = document.getElementById('focusArea').value;
+  const timeAvailable = document.getElementById('timeAvailable').value;
+  const energyLevel = document.getElementById('energyLevel').value;
+  const selectedActivityElements = document.querySelectorAll('input[name="activities"]:checked');
+  const preferredActivities = Array.from(selectedActivityElements).map((activity) => activity.value);
+  const activitiesText = preferredActivities.length > 0
+    ? preferredActivities.join(', ')
+    : 'No specific activities selected';
   
   // Find the submit button and update its appearance to show loading state
   const button = document.querySelector('button[type="submit"]');
@@ -22,7 +31,22 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
         model: 'gpt-4o',
         messages: [      
           { role: 'system', content: `You are a helpful assistant that creates quick, focused daily routines. Always keep routines short, realistic, and tailored to the user's preferences.` },
-          { role: 'user', content: '' }
+          {
+            role: 'user',
+            content: `Plan a personalized daily routine using these preferences:
+Time of day: ${timeOfDay}
+Focus area: ${focusArea}
+Time available: ${timeAvailable} minutes
+Energy level: ${energyLevel}
+Preferred activities: ${activitiesText}
+
+Please provide a clear, step-by-step routine that:
+1. Fits exactly within the available time.
+2. Matches the user's current energy level.
+3. Prioritizes the chosen focus area.
+4. Uses preferred activities when possible.
+5. Includes short time estimates for each step.`
+          }
         ],
         temperature: 0.7,
         max_completion_tokens: 500
